@@ -36,6 +36,7 @@ _opam/
 .function_combinators.ml
 
 .vscode/*
+*.sh
 
 # Coq
 *.glob
