@@ -1,8 +1,7 @@
 # Binaries
 *
 !*.*
-!coq/
-!ocaml/
+!*/
 *.out
 
 *.annot
@@ -37,3 +36,15 @@ _opam/
 .function_combinators.ml
 
 .vscode/*
+
+# Coq
+*.glob
+*.vo
+*.vok
+*.vos
+*.d
+*.aux
+.vscode/
+Makefile
+*.conf
+!_CoqProject

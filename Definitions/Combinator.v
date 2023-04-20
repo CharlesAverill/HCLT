@@ -1,6 +1,3 @@
-Require Import List.
-Import ListNotations.
-
 Declare Scope combinator_scope.
 Open Scope combinator_scope.
 
@@ -11,11 +8,6 @@ Inductive combinator : Type :=
     | W
     | Apply (c1 c2 : combinator).
 
-Definition combinator_dec : forall s1 s2 : combinator, {s1 = s2} + {s1 <> s2}.
-Proof.
-    decide equality.
-Defined.
-
 Notation "a @ b" :=
     (Apply a b)
     (at level 50, left associativity)
@@ -25,13 +17,6 @@ Notation "a @ b" :=
 Definition I := W @ K.
 (* S = B(BW)(BBC) *)
 Definition S := B @ (B @ W) @ (B @ B @ C).
-
-(* X0 X1 X2 ... XN = (((X0 X1) X2) ... XN)*)
-Definition comb_list_to_comb (cl : list combinator) : combinator :=
-    match cl with
-    | [] => I
-    | h :: t => List.fold_left (fun (acc item : combinator) => acc @ item) t h
-    end.
 
 Fixpoint reduce (expr : combinator) : combinator :=
     match expr with
@@ -58,15 +43,16 @@ Fixpoint reduce (expr : combinator) : combinator :=
             but unfortunately Coq does not allow
             recursive calls with non-strictly-decreasing
             arguments. 
+            
+            The partially correct but non-sufficient rule
                 (reduce x) @ (reduce y)
             is guaranteed to be smaller than 
                 x @ y,
             but the proper implementation is not.
             
             BCKW is isomorphic to untyped lambda calculus,
-            so infinite loops (that Coq also does not allow)
-            would be possible if the recursive argument
-            was allowed to grow.
+            so infinite loops would be possible if the 
+            recursive argument was allowed to grow.
          *)
         | x @ y => (reduce x) @ (reduce y)
         end
@@ -74,4 +60,9 @@ Fixpoint reduce (expr : combinator) : combinator :=
     end.
 
 (* Gives the right answer by chance *)
-Compute reduce ((B @ K) @ (B @ K) @ (B @ K)).
+(* Compute reduce ((B @ K) @ (B @ K) @ (B @ K)). *)
+
+(* Two combinators are beta-equivalent if their reductions are equal *)
+Definition beta_equivalent (a b : combinator) : Prop :=
+    reduce a = reduce b.
+
