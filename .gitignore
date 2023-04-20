@@ -1,6 +1,8 @@
 # Binaries
 *
 !*.*
+!coq/
+!ocaml/
 *.out
 
 *.annot
@@ -32,6 +34,6 @@ setup.log
 
 # Local OPAM switch
 _opam/
-constructor_combinators.ml
+.function_combinators.ml
 
 .vscode/*
