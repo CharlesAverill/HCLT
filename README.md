@@ -7,6 +7,7 @@
 ## Building
 
 ```bash
-coq_makefile -f _CoqProject $(find . -name "*.v") -o Makefile && make
+coq_makefile -f _CoqProject $(find . -name "*.v") -o Makefile
+
 make
 ```
