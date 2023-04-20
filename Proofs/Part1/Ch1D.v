@@ -6,7 +6,7 @@ From Definitions Require Export Combinator.
 *)
 
 (* 
-    Foreward
+    Foreword
     --------
 
     These first few theorems are very trivial
