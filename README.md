@@ -6,9 +6,9 @@
 
 ## Navigation
 
-- `Definitions` contains any Coq definitions of terms or concepts used in the thesis
+- [`Definitions`](Definitions/) contains any Coq definitions of terms or concepts used in the thesis
     - [`constructor_combinators.ml`](Definitions/constructor_combinators.ml) is an OCaml scratchpad I use to test definitions before I strongarm them into Coq
-- `Proofs` contains proofs from the thesis organized by part and chapter
+- [`Proofs`](Proofs/) contains proofs from the thesis organized by part and chapter
 
 ## Building
 
