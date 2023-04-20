@@ -4,7 +4,7 @@ let composite_combinators = [
     ('I', Apply (W, K));
     ('S', Apply (
         Apply (B, Apply (B, W)),
-        Apply (B, Apply (B, C))
+        Apply (Apply (B, B), C)
     ))
 ]
 
@@ -131,3 +131,11 @@ let rec reduce (e : comb list) : comb list =
 let () = assert (expr_list_to_str (reduce (str_to_expr_list "BCKWBCBWBK")) = "BW(BK)\n") ;;
 let () = assert (expr_list_to_str (reduce (str_to_expr_list "BKBKBK")) = "BKK\n") ;;
 let () = assert (expr_list_to_str (reduce [Apply (B, K); Apply (B, K); Apply (B, K)]) = "K((BK)(BK))\n") ;;
+
+print_string (
+    expr_list_to_str (reduce (str_to_expr_list "SKSKSK"))
+) ;;
+
+print_string (
+    expr_list_to_str (reduce (str_to_expr_list "S"))
+)
