@@ -17,8 +17,12 @@ From Definitions Require Export Combinator.
     defining the behavior and properties of
     combinators as a whole.
 
-    These theorems target "entities," which I'm 
-    interpreting to be combinators.
+    These theorems refer to "entities" in the
+    original text, which I'm interpreting to 
+    be combinators. I will generally disregard 
+    combinator expressions with non-combinator
+    subexpressions (free variables), such as 
+        Bxyz. 
 
     The proofs of these theorems in the original
     text use Curry's defined axioms from 
