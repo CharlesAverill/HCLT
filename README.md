@@ -10,6 +10,13 @@
     - [`constructor_combinators.ml`](Definitions/constructor_combinators.ml) is an OCaml scratchpad I use to test definitions before I strongarm them into Coq
 - [`Proofs`](Proofs/) contains proofs from the thesis organized by part and chapter
 
+## Contribution
+
+I would greatly appreciate contributions! 
+Any `Admitted` proofs are up for grabs, 
+but I'll also accept proof simplifications 
+or restructures.
+
 ## Building
 
 ```bash
