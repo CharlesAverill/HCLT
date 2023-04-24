@@ -24,6 +24,12 @@ Notation "a @ b" :=
     (at level 50, left associativity)
     : combinator_scope.
 
+Definition is_app (c : combinator) : Prop :=
+    match c with
+    | _ @ _ => True
+    | _ => False
+    end.
+
 (* I = WK *)
 (* Definition I := W @ K. *)
 (* S = B(BW)(BBC) *)
@@ -31,7 +37,7 @@ Notation "a @ b" :=
 
 Fixpoint size (c : combinator) : nat :=
     match c with 
-    | Apply a b => (size a) + (size b)
+    | a @ b => (size a) + (size b)
     | _ => 1
     end.
 
@@ -43,11 +49,20 @@ Proof.
     apply IHc1. apply le_0_n.
 Qed.
 
+Lemma size_app : forall (a b : combinator),
+    size (a @ b) = size a + size b.
+Proof.
+    intros. destruct a; reflexivity.
+Qed.
+
 Fixpoint nth_comb (c : combinator) (n : nat) : option combinator :=
     match n with
-    | O => Some c
+    | O => match c with 
+        | a @ b => nth_comb a 0
+        | _ => Some c
+        end
     | S n' => match c with 
-        | Apply a b => let left_result := nth_comb a n' in
+        | a @ b => let left_result := nth_comb a n' in
             match left_result with 
             | None => nth_comb b n'
             | _ => left_result
@@ -63,87 +78,11 @@ Lemma comb0_size1_impl_BCKW : forall (c X : combinator),
 Proof.
     intros. induction c; simpl in *; 
         try inversion H0; try reflexivity.
-Qed.
+
+        admit.
+Admitted.
 
 Lemma le_n_x_le_n_y_impl_lt_sum_n_x_y : forall (n x y : nat),
     n > 0 -> 
     n <= x -> n <= y -> n < x + y.
 Admitted.
-
-Lemma combSn_size1_eq_none : forall (c : combinator) (n : nat),
-    size c = 1 ->
-        nth_comb c (S n) = None.
-Proof.
-    intros. destruct c; try reflexivity.
-    contradict H; simpl.
-    apply not_eq_sym. apply PeanoNat.Nat.lt_neq.
-    apply le_n_x_le_n_y_impl_lt_sum_n_x_y. auto.
-    apply size_ge_1. apply size_ge_1.
-Qed.
-
-(* Lemma nthcomb_Si_impl_nthcomb_i : 
-    forall (c : combinator) (i : nat),
-    exists (Y X : combinator),
-    nth_comb c (S i) = Some X -> nth_comb c i = Some Y.
-Proof.
-    intros. induction i. 
-        exists c. 
-        unfold nth_comb. admit. *)
-    
-(* Lemma nthcomb_i_none_impl_i_ge_size : forall (c : combinator) (i : nat),
-    nth_comb c i = None -> size c <= i.
-Proof.
-    intros. induction c; simpl in *.
-        assert (exists x, i = S x).
-          destruct i. congruence.
-          exists i. reflexivity.
-        destruct i in H. contradict H. congruence.
-        simpl. destruct H0. rewrite H0.
-        apply le_n_S, le_0_n.
-
-        assert (exists x, i = S x).
-            destruct i. congruence.
-            exists i. reflexivity.
-          destruct i in H. contradict H. congruence.
-          simpl. destruct H0. rewrite H0.
-          apply le_n_S, le_0_n.
-
-        assert (exists x, i = S x).
-            destruct i. congruence.
-            exists i. reflexivity.
-          destruct i in H. contradict H. congruence.
-          simpl. destruct H0. rewrite H0.
-          apply le_n_S, le_0_n.
-
-        assert (exists x, i = S x).
-            destruct i. congruence.
-            exists i. reflexivity.
-          destruct i in H. contradict H. congruence.
-          simpl. destruct H0. rewrite H0.
-          apply le_n_S, le_0_n.
-
-    - destruct i. discriminate H.
-      destruct (nth_comb c1 i) in H. discriminate H.
-      admit.
-Admitted. *)
-         
-
-(* Lemma i_lt_n_impl_nthcomb_some : 
-    forall (c : combinator) (i : nat)
-        (I_LT_SC : i < size c),
-    exists (X : combinator),
-    nth_comb c i = Some X.
-Proof.
-    intros. induction c; 
-    (* Base Cases *)
-        simpl in I_LT_SC; try apply PeanoNat.Nat.lt_1_r in I_LT_SC;
-        try rewrite I_LT_SC; simpl; try congruence.
-    (* c = Apply c1 c2 *)
-        exists B. reflexivity.
-        exists C. reflexivity.
-        exists K. reflexivity.
-        exists W. reflexivity.
-        destruct i. exists (c1 @ c2). reflexivity.
-        apply IHc1. *)
-        
-
