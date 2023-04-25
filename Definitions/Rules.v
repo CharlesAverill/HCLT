@@ -26,30 +26,20 @@ Definition RuleS (x y z : combinator) : combinator :=
 
 Fixpoint reduce (expr : combinator) : combinator :=
     match expr with
+    (* Special rules for I *)
+    | W @ K 
+        @ x @ y => (RuleI x) @ y
+    | W @ K @ x     => RuleI x
+    (* Special rule for S *)
+    | B @ (B @ W) 
+      @ (B @ B @ C)
+      @ x @ y @ z   => RuleS x y z
+    (* Base combinators *)
+    | B @ x @ y @ z => RuleB x y z
+    | C @ x @ y @ z => RuleC x y z 
+    | K @ x @ y     => RuleK x y
+    | W @ x @ y     => RuleW x y
     | e1 @ e2 => match e1 with
-        | B => match e2 with 
-            | x @ y @ z => RuleB x y z
-            | _ => B @ reduce e2
-            end
-        | C => match e2 with 
-            | x @ y @ z => RuleC x y z
-            | _ => C @ reduce e2
-            end
-        | K => match e2 with 
-            | x @ y => RuleK x y
-            | _ => K @ reduce e2
-            end
-        | W => match e2 with
-            | x @ y => RuleW x y
-            | _ => W @ reduce e2
-            end
-        (* Special rule for I *)
-        | W @ K => reduce (RuleI e2)
-        (* Special rule for S *)
-        | B @ (B @ W) @ (B @ B @ C) => match e2 with
-            | x @ y @ z => RuleS x y z
-            | _ => cS @ reduce e2
-            end
         (* 
             The recursive call here *should* be 
                 reduce ((reduce x) @ y)
@@ -68,6 +58,7 @@ Fixpoint reduce (expr : combinator) : combinator :=
             recursive argument was allowed to grow.
          *)
         | x @ y => (reduce x) @ (reduce y) @ e2
+        | _ => e1
         end
     | _ => expr
     end.

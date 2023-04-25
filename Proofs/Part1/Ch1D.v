@@ -187,7 +187,10 @@ Qed.
 *)
 
 (* Theorem 9 *)
-Theorem identity_combinator : forall (x : combinator),
-    reduce (cI @ x) = reduce x.
+Theorem reduce_Ix : forall (x : combinator),
+    reduce (cI @ x) = x.
 Proof. reflexivity. Qed.
-    
+
+Lemma reduce_Ixy : forall (x y : combinator),
+    reduce (cI @ x @ y) = x @ y.
+Proof. intros. simpl. reflexivity. Qed.
