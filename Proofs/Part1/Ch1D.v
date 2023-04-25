@@ -1,5 +1,4 @@
-From Definitions Require Export Combinator.
-From Definitions Require Export Axioms.
+From Definitions Require Export Combinator Rules Axioms.
 
 (* 
     CHAPTER 1
@@ -84,6 +83,7 @@ Proof.
     - split; inversion H; reflexivity.
     - intros. destruct H. rewrite H, H0. reflexivity. 
 Qed.
+
 Theorem alpha_equivalence : forall (X R x1 x2 r1 r2 : combinator) (i : nat)
     (X_R_HAVE_SIZE_N : size R = size X)
     (I_LT_N : i < size X)
@@ -165,4 +165,29 @@ Proof.
         apply PeanoNat.Nat.lt_1_r in I_LT_N. 
         contradict I_LT_N. apply PeanoNat.Nat.neq_succ_0.
 Qed.
-            
+
+(* Theorem 8 *)
+(* 
+    The theorems 
+        "X is equivalent to R" 
+    and
+        "From the previously given theorems
+         of the form 
+            'x_i is equivalent to y_i,`
+         the theorem 
+            '|- X = R'
+         can be proved using only
+         Theorem 5 and properties of equality"
+    are equivalent.
+*)
+(* 
+    I am not confident that this theorem 
+    can be accurately and succinctly 
+    constructed in Coq.
+*)
+
+(* Theorem 9 *)
+Theorem identity_combinator : forall (x : combinator),
+    reduce (cI @ x) = reduce x.
+Proof. reflexivity. Qed.
+    

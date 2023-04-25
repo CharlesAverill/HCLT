@@ -16,6 +16,14 @@ Definition RuleK (x y : combinator) : combinator :=
 Definition RuleW (x y : combinator) : combinator :=
     x @ y @ y.
 
+(* Identity Function *)
+Definition RuleI (x : combinator) : combinator :=
+    x.
+
+(* Substitution Operator *)
+Definition RuleS (x y z : combinator) : combinator :=
+    x @ z @ (y @ z).
+
 Fixpoint reduce (expr : combinator) : combinator :=
     match expr with
     | e1 @ e2 => match e1 with
@@ -33,7 +41,14 @@ Fixpoint reduce (expr : combinator) : combinator :=
             end
         | W => match e2 with
             | x @ y => RuleW x y
-            | _ => W @ e2
+            | _ => W @ reduce e2
+            end
+        (* Special rule for I *)
+        | W @ K => reduce (RuleI e2)
+        (* Special rule for S *)
+        | B @ (B @ W) @ (B @ B @ C) => match e2 with
+            | x @ y @ z => RuleS x y z
+            | _ => cS @ reduce e2
             end
         (* 
             The recursive call here *should* be 
@@ -52,7 +67,7 @@ Fixpoint reduce (expr : combinator) : combinator :=
             so infinite loops would be possible if the 
             recursive argument was allowed to grow.
          *)
-        | x @ y => (reduce x) @ (reduce y)
+        | x @ y => (reduce x) @ (reduce y) @ e2
         end
     | _ => expr
     end.

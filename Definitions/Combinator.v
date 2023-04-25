@@ -31,10 +31,14 @@ Definition is_app (c : combinator) : Prop :=
     | _ => False
     end.
 
+(* 
+    I will use the 'c' prefix to denote 
+    "constructed" (derivable) combinators
+*)
 (* I = WK *)
-(* Definition I := W @ K. *)
+Definition cI := W @ K.
 (* S = B(BW)(BBC) *)
-(* Definition S := B @ (B @ W) @ (B @ B @ C). *)
+Definition cS := B @ (B @ W) @ (B @ B @ C).
 
 Fixpoint size (c : combinator) : nat :=
     match c with 
@@ -88,14 +92,15 @@ Proof.
 Qed.
 
 Lemma comb0_size1_impl_BCKW : forall (c X : combinator),
-    1 = size c ->
+    size c = 1 ->
         nth_comb c 0 = Some X ->
             c = X.
 Proof.
     intros. induction c; simpl in *; 
         try inversion H0; try reflexivity.
 
-        contradict H. apply PeanoNat.Nat.lt_neq, two_sizes_gt_1.
+        contradict H. apply not_eq_sym. 
+        apply PeanoNat.Nat.lt_neq, two_sizes_gt_1.
 Qed.
 
 Lemma le_n_x_le_n_y_impl_lt_sum_n_x_y : forall (n x y : nat),
