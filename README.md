@@ -17,6 +17,10 @@ Any `Admitted` proofs are up for grabs,
 but I'll also accept proof simplifications 
 or restructures.
 
+Additionally, I want the code to read like 
+a book or blog post. Documentation PRs 
+are also kindly appreciated.
+
 ## Building
 
 ```bash
