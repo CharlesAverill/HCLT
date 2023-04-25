@@ -1,5 +1,6 @@
 Require Import Nat.
 Require Import NArith.
+Require Import Lia.
 
 Declare Scope combinator_scope.
 Open Scope combinator_scope.
@@ -65,18 +66,39 @@ Fixpoint nth_comb (c : combinator) (n : nat) : option combinator :=
     | _ => match n with O => Some c | _ => None end
     end.
 
+Lemma two_sizes_geq_2 : forall (a b : combinator),
+    2 <= size a + size b.
+Proof.
+    intros. apply PeanoNat.Nat.add_le_mono with (n := 1) (m := size a); 
+    apply size_ge_1.
+Qed.
+
+Lemma two_sizes_gt_1 : forall (a b : combinator),
+    1 < size a + size b.
+Proof.
+    intros. apply PeanoNat.Nat.lt_le_trans with (m := 2). 
+    apply le_n. 
+    apply two_sizes_geq_2.
+Qed.
+
+Lemma two_sizes_neq_1 : forall (a b : combinator),
+    1 <> size a + size b.
+Proof.
+    intros. apply PeanoNat.Nat.lt_neq, two_sizes_gt_1.
+Qed.
+
 Lemma comb0_size1_impl_BCKW : forall (c X : combinator),
-    size c = 1 ->
+    1 = size c ->
         nth_comb c 0 = Some X ->
             c = X.
 Proof.
     intros. induction c; simpl in *; 
         try inversion H0; try reflexivity.
 
-        admit.
-Admitted.
+        contradict H. apply PeanoNat.Nat.lt_neq, two_sizes_gt_1.
+Qed.
 
 Lemma le_n_x_le_n_y_impl_lt_sum_n_x_y : forall (n x y : nat),
-    n > 0 -> 
+    0 < n -> 
     n <= x -> n <= y -> n < x + y.
-Admitted.
+Proof. lia. Qed.
