@@ -49,3 +49,4 @@ _opam/
 Makefile
 *.conf
 !_CoqProject
+*.cache
