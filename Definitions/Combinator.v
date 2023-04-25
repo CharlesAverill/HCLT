@@ -56,19 +56,13 @@ Proof.
 Qed.
 
 Fixpoint nth_comb (c : combinator) (n : nat) : option combinator :=
-    match n with
-    | O => match c with 
-        | a @ b => nth_comb a 0
-        | _ => Some c
+    match c with
+    | a @ b => let left_result := nth_comb a n in 
+        match left_result with
+        | None => nth_comb b (n - 1)
+        | _ => left_result
         end
-    | S n' => match c with 
-        | a @ b => let left_result := nth_comb a n' in
-            match left_result with 
-            | None => nth_comb b n'
-            | _ => left_result
-            end
-        | _ => None
-        end
+    | _ => match n with O => Some c | _ => None end
     end.
 
 Lemma comb0_size1_impl_BCKW : forall (c X : combinator),
