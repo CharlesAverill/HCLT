@@ -24,7 +24,7 @@ Definition RuleI (x : combinator) : combinator :=
 Definition RuleS (x y z : combinator) : combinator :=
     x @ z @ (y @ z).
 
-Fixpoint reduce (expr : combinator) : combinator :=
+(* Fixpoint reduce (expr : combinator) : combinator :=
     match expr with
     (* Special rules for I *)
     | W @ K 
@@ -61,11 +61,11 @@ Fixpoint reduce (expr : combinator) : combinator :=
         | _ => e1
         end
     | _ => expr
-    end.
+    end. *)
 
 (* Gives the right answer by chance *)
 (* Compute reduce ((B @ K) @ (B @ K) @ (B @ K)). *)
 
 (* Two combinators are beta-equivalent if their reductions are equal *)
-Definition beta_equivalent (a b : combinator) : Prop :=
-    reduce a = reduce b.
+(* Definition beta_equivalent (a b : combinator) : Prop :=
+    reduce a = reduce b. *)
