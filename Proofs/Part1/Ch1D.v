@@ -1,4 +1,6 @@
 From Definitions Require Export Combinator Rules Axioms.
+Require Import Coq.Classes.RelationClasses.
+Require Import Lia.
 
 (* 
     CHAPTER 1
@@ -42,47 +44,68 @@ From Definitions Require Export Combinator Rules Axioms.
 (* Axiom of Equality *)
 Theorem Qxx : forall (x : combinator),
     Q x x.
-Proof. intros. reflexivity. Qed.
+Proof. intros. cvgleft 1. repeat step. Qed.
+
+Global Instance Q_reflexive : Reflexive Q := Qxx.
 
 (* Theorem 2 *)
 (* Equality is Symmetric *)
-Theorem Qxy_Qyx : forall (x y : combinator),
+Theorem Qsym : forall (x y : combinator),
     Q x y -> Q y x.
-Proof. intros. symmetry. apply H. Qed.
+Proof.
+    intros. unfold Q in *.
+Admitted.
+
+Global Instance Q_symmetric : Symmetric Q := Qsym.
 
 (* Theorem 3 *)
 (* Equality is Transitive *)
 Theorem Qxy_Qyz_Qxz : forall (x y z : combinator),
     Q x y -> Q y z -> Q x z.
 Proof.
-    intros. rewrite <- H0. apply H.
+    intros. destruct H, H0.
+    exists (x0 + x1). revert x H. induction x0; intros; simpl in *.
+    - rewrite H. apply H0.
+    - destruct H as [x2 [H1 H2]]. apply IHx0 in H2.
+      exists x2. split. apply H1. apply H2.
 Qed.
+
+Global Instance Q_transitive : Transitive Q := Qxy_Qyz_Qxz.
 
 (* Theorem 4 *)
 (* Inverse functional extensoinality *)
 Theorem Qxy_impl_Q_xz_yz : forall (x y z : combinator),
     Q x y -> Q (x @ z) (y @ z).
-Proof. intros. rewrite H. reflexivity. Qed.
+Proof. 
+    intros. destruct H. revert x H. induction x0; intros; simpl in *.
+    - rewrite H. step.
+    - destruct H as [x2 [H_step H_converge]]. exists x0.
+      apply IHx0 in H_converge. 
+Admitted.
 
 (* Theorem 5 *)
 Theorem x_equiv_y_impl_Qxy : forall (x y : combinator),
     x = y -> Q x y.
 Proof.
-    intros. apply H. Qed.
+    intros. rewrite H. reflexivity. Qed.
 
 (* Theorem 6 *)
 (* Equality is reflexive, transitive, and symmetric *)
 (* This is a summary of the previous theorems *)
 
 (* Theorem 7 *)
-Lemma apply_equivalence : forall (A B C D : combinator),
-    Q (A @ B) (C @ D) <->
-        Q A C /\ Q B D.
+Lemma apply_equivalence : forall (X Y Z W : combinator),
+    Q (X @ Y) (Z @ W) <->
+        Q X Z /\ Q Y W.
 Proof.
-    split.
-    - split; inversion H; reflexivity.
-    - intros. destruct H. rewrite H, H0. reflexivity. 
-Qed.
+    split; intros.
+    - destruct H. induction x.
+        -- simpl in H. inversion H. split; reflexivity.
+        -- destruct H as [x0 [H_step H_converge]]. admit.  
+    - destruct H. destruct H, H0. induction x, x0.
+        -- rewrite H, H0. reflexivity.
+        -- rewrite H. destruct H0 as [x1 [H_step H_converge]]. 
+Admitted.
 
 Theorem alpha_equivalence : forall (X R x1 x2 r1 r2 : combinator) (i : nat)
     (X_R_HAVE_SIZE_N : size R = size X)
@@ -90,80 +113,67 @@ Theorem alpha_equivalence : forall (X R x1 x2 r1 r2 : combinator) (i : nat)
     (EQ_Xi_Ri : nth_comb X i = nth_comb R i)
     (CHILDREN_IF_APP_X : is_app X -> Q X (x1 @ x2))
     (CHILDREN_IF_APP_R : is_app R -> Q R (r1 @ r2))
-    (SUBTREES_EQ : X = Apply x1 x2 -> R = r1 @ r2 -> Q x1 r1 /\ Q x2 r2),
+    (SUBTREES_EQ : X q= x1 @ x2 -> R q= r1 @ r2 -> Q x1 r1 /\ Q x2 r2),
     Q X R.
 Proof.
-    intros.
-    destruct X; simpl in *.
-    5: {
-        destruct R; simpl in *.
-        5: {
-            specialize (CHILDREN_IF_APP_X I).
-            specialize (CHILDREN_IF_APP_R I).
-            destruct SUBTREES_EQ. trivial. trivial.
-            apply apply_equivalence in CHILDREN_IF_APP_R.
-            apply apply_equivalence in CHILDREN_IF_APP_X.
-            destruct CHILDREN_IF_APP_R, CHILDREN_IF_APP_X.
-            rewrite H1, H2, H3, H4.
-            apply apply_equivalence. split. apply H. apply H0.
-        }
-
-        contradict X_R_HAVE_SIZE_N.
-        assert (2 <= size X1 + size X2). {
-            apply PeanoNat.Nat.add_le_mono with (n := 1) (m := size X1) (p := 1) (q := size X2);
-                try apply size_ge_1.
-        } assert (1 < size X1 + size X2). {
-            apply PeanoNat.Nat.lt_le_trans with (m := 2). apply le_n.
-            apply H.
-        } apply PeanoNat.Nat.lt_neq, H0.
-
-        contradict X_R_HAVE_SIZE_N.
-        assert (2 <= size X1 + size X2). {
-            apply PeanoNat.Nat.add_le_mono with (n := 1) (m := size X1) (p := 1) (q := size X2);
-                try apply size_ge_1.
-        } assert (1 < size X1 + size X2). {
-            apply PeanoNat.Nat.lt_le_trans with (m := 2). apply le_n.
-            apply H.
-        } apply PeanoNat.Nat.lt_neq, H0.
-
-        contradict X_R_HAVE_SIZE_N.
-        assert (2 <= size X1 + size X2). {
-            apply PeanoNat.Nat.add_le_mono with (n := 1) (m := size X1) (p := 1) (q := size X2);
-                try apply size_ge_1.
-        } assert (1 < size X1 + size X2). {
-            apply PeanoNat.Nat.lt_le_trans with (m := 2). apply le_n.
-            apply H.
-        } apply PeanoNat.Nat.lt_neq, H0.
-
-        contradict X_R_HAVE_SIZE_N.
-        assert (2 <= size X1 + size X2). {
-            apply PeanoNat.Nat.add_le_mono with (n := 1) (m := size X1) (p := 1) (q := size X2);
-                try apply size_ge_1.
-        } assert (1 < size X1 + size X2). {
-            apply PeanoNat.Nat.lt_le_trans with (m := 2). apply le_n.
-            apply H.
-        } apply PeanoNat.Nat.lt_neq, H0.
-    }
-    - destruct i; simpl in *. 
-        symmetry. apply comb0_size1_impl_BCKW.
-        apply X_R_HAVE_SIZE_N. symmetry. apply EQ_Xi_Ri.
-        apply PeanoNat.Nat.lt_1_r in I_LT_N. 
-        contradict I_LT_N. apply PeanoNat.Nat.neq_succ_0.
-    - destruct i; simpl in *. 
-        symmetry. apply comb0_size1_impl_BCKW.
-        apply X_R_HAVE_SIZE_N. symmetry. apply EQ_Xi_Ri.
-        apply PeanoNat.Nat.lt_1_r in I_LT_N. 
-        contradict I_LT_N. apply PeanoNat.Nat.neq_succ_0.
-    - destruct i; simpl in *. 
-        symmetry. apply comb0_size1_impl_BCKW.
-        apply X_R_HAVE_SIZE_N. symmetry. apply EQ_Xi_Ri.
-        apply PeanoNat.Nat.lt_1_r in I_LT_N. 
-        contradict I_LT_N. apply PeanoNat.Nat.neq_succ_0.
-    - destruct i; simpl in *. 
-        symmetry. apply comb0_size1_impl_BCKW.
-        apply X_R_HAVE_SIZE_N. symmetry. apply EQ_Xi_Ri.
-        apply PeanoNat.Nat.lt_1_r in I_LT_N. 
-        contradict I_LT_N. apply PeanoNat.Nat.neq_succ_0.
+    intros. induction X, R; try reflexivity.
+    - contradict EQ_Xi_Ri. induction i. discriminate. contradict I_LT_N.
+        simpl. lia.
+    - contradict EQ_Xi_Ri. induction i. discriminate. contradict I_LT_N.
+        simpl. lia.
+    - contradict EQ_Xi_Ri. induction i. discriminate. contradict I_LT_N.
+        simpl. lia.
+    - contradict X_R_HAVE_SIZE_N. simpl. assert (1 < size R1 + size R2). {
+        apply PeanoNat.Nat.lt_le_trans with (n := 1) (m := 2) (p := size R1 + size R2).
+        lia. apply two_sizes_geq_2.
+      } apply not_eq_sym, PeanoNat.Nat.lt_neq, H.
+    - contradict EQ_Xi_Ri. induction i. discriminate. contradict I_LT_N.
+        simpl. lia.
+    - contradict EQ_Xi_Ri. induction i. discriminate. contradict I_LT_N.
+        simpl. lia.
+    - contradict EQ_Xi_Ri. induction i. discriminate. contradict I_LT_N.
+        simpl. lia.
+    - contradict X_R_HAVE_SIZE_N. simpl. assert (1 < size R1 + size R2). {
+        apply PeanoNat.Nat.lt_le_trans with (n := 1) (m := 2) (p := size R1 + size R2).
+        lia. apply two_sizes_geq_2.
+        } apply not_eq_sym, PeanoNat.Nat.lt_neq, H.
+    - contradict EQ_Xi_Ri. induction i. discriminate. contradict I_LT_N.
+        simpl. lia.
+    - contradict EQ_Xi_Ri. induction i. discriminate. contradict I_LT_N.
+        simpl. lia.
+    - contradict EQ_Xi_Ri. induction i. discriminate. contradict I_LT_N.
+        simpl. lia.
+    - contradict X_R_HAVE_SIZE_N. simpl. assert (1 < size R1 + size R2). {
+        apply PeanoNat.Nat.lt_le_trans with (n := 1) (m := 2) (p := size R1 + size R2).
+        lia. apply two_sizes_geq_2.
+        } apply not_eq_sym, PeanoNat.Nat.lt_neq, H.
+    - contradict EQ_Xi_Ri. induction i. discriminate. contradict I_LT_N.
+        simpl. lia.
+    - contradict EQ_Xi_Ri. induction i. discriminate. contradict I_LT_N.
+        simpl. lia.
+    - contradict EQ_Xi_Ri. induction i. discriminate. contradict I_LT_N.
+        simpl. lia.
+    - contradict X_R_HAVE_SIZE_N. simpl. assert (1 < size R1 + size R2). {
+        apply PeanoNat.Nat.lt_le_trans with (n := 1) (m := 2) (p := size R1 + size R2).
+        lia. apply two_sizes_geq_2.
+        } apply not_eq_sym, PeanoNat.Nat.lt_neq, H.
+    - contradict X_R_HAVE_SIZE_N. simpl. assert (1 < size X1 + size X2). {
+        apply PeanoNat.Nat.lt_le_trans with (n := 1) (m := 2) (p := size X1 + size X2).
+        lia. apply two_sizes_geq_2.
+        } apply PeanoNat.Nat.lt_neq, H.
+    - contradict X_R_HAVE_SIZE_N. simpl. assert (1 < size X1 + size X2). {
+        apply PeanoNat.Nat.lt_le_trans with (n := 1) (m := 2) (p := size X1 + size X2).
+        lia. apply two_sizes_geq_2.
+        } apply PeanoNat.Nat.lt_neq, H.
+    - contradict X_R_HAVE_SIZE_N. simpl. assert (1 < size X1 + size X2). {
+        apply PeanoNat.Nat.lt_le_trans with (n := 1) (m := 2) (p := size X1 + size X2).
+        lia. apply two_sizes_geq_2.
+        } apply PeanoNat.Nat.lt_neq, H.
+    - contradict X_R_HAVE_SIZE_N. simpl. assert (1 < size X1 + size X2). {
+        apply PeanoNat.Nat.lt_le_trans with (n := 1) (m := 2) (p := size X1 + size X2).
+        lia. apply two_sizes_geq_2.
+        } apply PeanoNat.Nat.lt_neq, H.
+    - admit.
 Qed.
 
 (* Theorem 8 *)

@@ -16,14 +16,6 @@ Definition RuleK (x y : combinator) : combinator :=
 Definition RuleW (x y : combinator) : combinator :=
     x @ y @ y.
 
-(* Identity Function *)
-Definition RuleI (x : combinator) : combinator :=
-    x.
-
-(* Substitution Operator *)
-Definition RuleS (x y z : combinator) : combinator :=
-    x @ z @ (y @ z).
-
 (* Fixpoint reduce (expr : combinator) : combinator :=
     match expr with
     (* Special rules for I *)

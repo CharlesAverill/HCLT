@@ -1,6 +1,8 @@
 Require Import Nat.
 Require Import NArith.
 Require Import Lia.
+Require Import List.
+Import ListNotations.
 
 Declare Scope combinator_scope.
 Open Scope combinator_scope.
@@ -25,12 +27,62 @@ Notation "a @ b" :=
     (at level 50, left associativity)
     : combinator_scope.
 
+Fixpoint farleftapply (x c : combinator) :=
+    match c with 
+    | a @ b => (farleftapply x a) @ b
+    | _ => x @ c
+    end.
+
+Notation "a |@ b" :=
+    (farleftapply a b)
+    (at level 40, left associativity)
+    : combinator_scope.
+
 Definition is_app (c : combinator) : Prop :=
     match c with
     | _ @ _ => True
     | _ => False
     end.
 
+Definition comblist_to_app (l : list combinator) : option combinator :=
+    let fix rechelper (l : list combinator) : option combinator :=
+        match l with 
+        | [] => None
+        | h :: t => let t' := rechelper t in
+            match t' with | None => Some h | Some x => Some (x @ h) end
+        end
+    in rechelper (rev l).
+
+Lemma rev_append_nnil : forall (A : Type) (l m : list A),
+    0 < length m -> 
+        rev_append l m <> [].
+Proof.
+    intros. induction l.
+    - simpl. induction m. contradict H. apply PeanoNat.Nat.lt_irrefl.
+             apply not_eq_sym, nil_cons.
+    - simpl.
+Admitted.
+
+Lemma comblist_notnil_impl_cl2a_notnone : forall (l : list combinator),
+    l <> nil ->
+        comblist_to_app l <> None.
+Proof.
+    intros. unfold comblist_to_app. 
+        assert (rev l <> []). {
+            induction l. contradict H. reflexivity.
+            unfold rev. rewrite <- rev_append_rev.
+            apply rev_append_nnil. apply le_n.
+        } destruct (rev l). contradiction. 
+        destruct ((fix rechelper (l1 : list combinator) : option combinator :=
+        match l1 with
+        | [] => None
+        | h :: t =>
+            match rechelper t with
+            | Some x => Some (x @ h)
+            | None => Some h
+            end
+        end) l0); discriminate.
+Qed.
 (* 
     I will use the 'c' prefix to denote 
     "constructed" (derivable) combinators
@@ -52,12 +104,6 @@ Proof.
     induction c; try reflexivity.
     apply PeanoNat.Nat.add_le_mono with (n := 1) (p := 0) (m := size c1) (q := size c2).
     apply IHc1. apply le_0_n.
-Qed.
-
-Lemma size_app : forall (a b : combinator),
-    size (a @ b) = size a + size b.
-Proof.
-    intros. destruct a; reflexivity.
 Qed.
 
 Fixpoint nth_comb (c : combinator) (n : nat) : option combinator :=
