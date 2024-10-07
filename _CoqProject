@@ -1,2 +1,6 @@
 -Q Definitions/ Definitions
 -Q Proofs/ Proofs
+Definitions/Combinators.v
+Definitions/Semantics.v
+Proofs/Part1/Ch1D.v
+Proofs/Part1/Ch2B.v
