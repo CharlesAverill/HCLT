@@ -73,59 +73,40 @@ Proof.
     now inversion H0.
 Qed.
 
-Fixpoint sublist {A : Type} (l : list A) (i : nat) : list A :=
+Fixpoint sublist {A : Type} (l : list A) (i : nat) : option (list A) :=
     match i, l with
-    | O, _ => []
-    | S i', [] => []
+    | O, _ => Some []
+    | S i', [] => None
     | S i', h :: t =>
-        h :: sublist t i'
+        match sublist t i' with
+        | None => None
+        | Some x => Some (h :: x)
+        end
     end.
 
-Lemma sublist_length : forall (A : Type) (l : list A),
-    sublist l (length l) = l.
+Theorem list_eq_if_nth_error_eq : forall (A : Type) (l1 l2 : list A),
+    (forall i, nth_error l1 i = nth_error l2 i) -> l1 = l2.
 Proof.
-    induction l; simpl.
-        reflexivity.
-    now rewrite IHl.
-Qed.
-
-Lemma nth_eq_sublist_eq :
-    forall (A : Type) (l1 l2 : list A)
-           (n i : nat)
-           (d : A),
-    length l1 = length l2 ->
-    n < i ->
-    nth n l1 d = nth n l2 d ->
-    sublist l1 i = sublist l2 i.
-Admitted.
-
-Lemma nth_eq_list_eq :
-    forall (A : Type) (l1 l2 : list A)
-           (i : nat)
-           (d : A),
-    length l1 = length l2 ->
-    i < length l1 ->
-    nth i l1 d = nth i l2 d ->
-    l1 = l2.
-Proof.
-    intros.
-    pose proof (nth_eq_sublist_eq A l1 l2 i (length l1) d H H0 H1).
-    now rewrite sublist_length, H, sublist_length in H2.
+    induction l1; intros.
+    - destruct l2. reflexivity.
+      specialize (H 0). inversion H.
+    - destruct l2. specialize (H 0). inversion H.
+      pose proof (H 0). inversion H0. clear H2.
+      f_equal. apply IHl1. intro. specialize (H (S i)).
+      apply H.
 Qed.
 
 Theorem list_comb_app_inv :
     forall (Xl Dl : list combinator)
-           (X D default : combinator)
-           (i : nat),
+           (X D : combinator),
     Some X = app_comb_list Xl ->
     Some D = app_comb_list Dl ->
     length Xl = length Dl ->
-    i < length Xl ->
-    nth i Xl default = nth i Dl default ->
+    (forall i, nth_error Xl i = nth_error Dl i) ->
     X = D.
 Proof.
     intros.
-    pose proof (nth_eq_list_eq combinator Xl Dl i default H1 H2 H3).
+    pose proof (list_eq_if_nth_error_eq combinator _ _ H2).
     subst. rewrite <- H in H0. now inversion H0.
 Qed.
 
@@ -148,7 +129,9 @@ Proof.
     intros. unfold _S.
     step left.
     do 14 (step right).
-Abort.
+    apply Q_app_l.
+    repeat step right.
+Qed.
 
 Corollary Schonfinkel_KSW : forall x y,
     Q (W @ x @ y) (_S @ _S @ (_S @ K) @ x @ y).
@@ -156,7 +139,9 @@ Proof.
     intros. unfold _S.
     step left.
     do 12 (step right).
-Abort.
+    apply Q_app_l.
+    repeat step right.
+Qed.
 
 Corollary Schonfinkel_KSI : forall x,
     Q (_I @ x) (_S @ K @ K @ x).

@@ -46,7 +46,7 @@ _opam/
 *.d
 *.aux
 .vscode/
-Makefile
 *.conf
 !_CoqProject
+!Makefile
 *.cache
